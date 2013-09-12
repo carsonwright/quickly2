@@ -1,97 +1,60 @@
-  $(function(){
-    /*
-     * Models
-     */
-    $Object = Array();
+var tag = $("<div class='well' ><div class='row tf-title text-center'>div</div></div>");
+var currentKey = "";
+var tagList = ["div", "form", "input:text.radio.password.checkbox.submit.select", "p", "a", "b", "i", "ul", "ol", "li", "label", "button"];
 
-    /*
-     * Div
-     */
-    $Object["div"] = $("<div>");
-    $Div = function(attr, content){
-      $div = $Object["div"].clone().attr(attr);
-      $div.html(content);
-      return $div;
+$(function(){
+  reset_div();
+  $("body").keydown(function(e){
+    currentKey = e.which
+  })
+  $("body").keyup(function(){
+    currentKey = false;
+  })
+  $settings = $("<div class='well settings'>");
+
+  styles = $("<style>");
+  styles.append(".tag:hover{border:1px dashed #aaa;margin:0px;}.tag{margin:1px;} .settings .btn{height:3em; }")
+  $("head").append(styles);
+  $(tagList).each(function(i, tagName){
+    if(String(tagName).indexOf("input") != -1){
+      type = String(tagName).split(":")[1].split(".");
+      tagName = String(tagName).split(":")[0];
+      $(type).each(function(i, type){
+        var lTag = $("<div class='btn btn-default'><"+tagName+" type='"+type+"' disabled='true' /></div>")
+        $settings.append(lTag);
+      })
+   }else{
+      var lTag = $("<div class='btn btn-default'><"+tagName+" class='element pull-left' disabled=true>"+tagName+"</"+tagName+"></div>")
+      $settings.append(lTag);
     }
-
-    /*
-     * I
-     */
-    $Object["i"] = $("<i>");
-    $I = function(attr, content){
-      $i = $Object["i"].clone().attr(attr);
-      $i.html(content);
-      return $i;
-    }
-
-    /*
-     * P
-     */
-    $Object["p"] = $("<p>");
-    $P = function(attr, content){
-      $p = $Object["i"].clone().attr(attr);
-      $p.html(content);
-      return $p;
-    }
-
-    /*
-     * Form
-     */
-    $Object["form"] = $("<form>");
-    $Form = function(attr, content){
-      $form = $Object["form"].clone().attr(attr);
-      $form.html(content);
-      return $form;
-    }
-
-    /*
-     * Input
-     */
-    $Object["input"] = $("<input>");
-    $Input = function(attr){
-      $input = $Object["input"].clone().attr(attr);
-      return $input;
-    }
-
-    /*
-     * body
-     */
-    $body = $("body");
-
-    /*
-     * Input
-     */
-    $Object["input"] = $("<input>");
-
-    /*
-     * Label
-     */
-    $Object["label"] = $("<label>");
-    $Label = function(attr, content){
-      $label = $Object["label"].clone().attr(attr);
-      $label.html(content);
-      return $label;
-    }
-
-    $ControlGroup = function(controlName, controlType, attr){
-      $controlGroup = $Div({class:"control-group"});
-      $controlGroup.append($Label($.extend({class:"control-label", for:"input"+controlName}, attr["label"]), controlName));
-      $controlGroup.append($Div({class:"controls"},
-        $Input({type:controlType, id:"input"+controlName, placeholder:controlName})
-      ));
-      return $controlGroup;
-    }
-
-    $body.append(
-      $Form({class:"form-horizontal"}).append(
-        $ControlGroup("Test", "text", {}),
-        $Input({type:"submit", class:"btn"})
-      ),
-      $Div({}, $Input({value:"test"}))
-    );
-
-    $(document).click(function(event){
-      console.log($(event.target));
-    });
   });
+  $("body").prepend($settings)
+  $settings.children().click(function(){
+    tag = $(this).children().first();
+    tagName = tag[0].tagName.toLowerCase();
+    if(tagName != "input" && tagName != "button"){
+      tag = $("<" + tagName  + " class='tag'><div class='row tf-title text-center'>" + tagName + "</div></" + tagName + ">");
+    }else if(tagName == "input"){
+      tag = $("<input type='"+tag.attr("type")+"' />");
+    }else if(tagName == "button"){
+      tag = $("<button>"+tagName+"</button>");
+    }
+    console.log(tag);
+  })
+})
 
+var $currentTag = Object();
+function reset_div(){
+  $(".canvas").find(tagList.join(", ")).not(".tf-title").unbind();
+  currentTag = $(this);
+  $(".canvas").find(tagList.join(", ")).not(".tf-title").click(function(e){
+    e.stopPropagation();
+    if(currentKey == 18){
+      $(this).append(tag.clone());
+    }else{
+      $(".selected").removeClass("selected");
+      $(this).addClass("selected");
+    }
+    reset_div();
+  });
+}
